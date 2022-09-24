@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  node-image: circleci/node:13.8.0
   slack: circleci/slack@4.10.1
   aws-cli: circleci/aws-cli@2.0.3
 
