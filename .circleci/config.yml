@@ -8,16 +8,35 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      # Add parameter here   
+      # Add parameter here
+        id:
+            type: string      
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
             # Your code here
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
-            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+            if aws s3api head-bucket --bucket udapeople-<< parameters.id >> 
+            then
+              aws s3 rm s3://udapeople-<< parameters.id >> --recursive
+            fi
             #exit 1
+            
+      - run:
+          name: Delete the AWS CloudFormation stacks
+          when: on_fail          
+          command: |   
+            if aws cloudformation wait stack-exists --stack-name udapeople-frontend-<< parameters.id >> 
+            then 
+              echo "Deleting frontend stack"
+              aws cloudformation delete-stack --region us-east-1 --stack-name udapeople-frontend-<< parameters.id >>
+            fi
+            if aws cloudformation wait stack-exists --stack-name udapeople-backend-<< parameters.id >>
+            then
+              echo "deleting backend stack"
+              aws cloudformation delete-stack --region us-east-1 --stack-name udapeople-backend-<< parameters.id >>
+            fi
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -27,15 +46,20 @@ commands:
       - run:
           name: Revert migrations
           # Add when this will run
+          when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
+            #Read more about this
+            SUCCESS=$(curl -k https://kvdb.io/3UwAx3Yk3DUZ5egcUYm3tW/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            echo $SUCCESS
+            
             if(( $SUCCESS==1 )); 
             then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
+              cd ~/project/backend
+              npm install
+              Add revert code here. You can find this in the Getting Started section.
+              npm run migrations:revert
+              #exit 1
             fi
             
 jobs:
@@ -154,12 +178,14 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
+      - run: yum -y install tar gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=prj3-backend-deploy \
+              --region us-east-1 \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
               #exit 1
@@ -169,6 +195,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=prj3-frontend-deploy \
+              --region us-east-1 \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
               #exit 1
@@ -176,17 +203,27 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             # Your code here
-            aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters "Name=tag:project,Values=prj3-backend-deploy" \
-            --output text >> inventory.txt
+            cd .circleci/ansible
+            echo "[web]" > inventory.txt
+            
+            export BACKEND_IP=$(aws ec2 describe-instances \
+                                --region us-east-1 \
+                                --query 'Reservations[*].Instances[*].PublicIpAddress' \
+                                --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+                                --output text >> inventory.txt)
+                                
+            echo "Server_Ip = ${BACKEND_IP}" 
+            echo ${BACKEND_IP} >> inventory.txt
+            cat inventory.txt
+            
             #exit 1
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure
-      - destroy-environment
+      - destroy-environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   configure-infrastructure:
     docker:
