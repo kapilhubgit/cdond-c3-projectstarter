@@ -13,6 +13,13 @@ commands:
             type: string      
     steps:
       - run:
+          name: Install PIP
+          command: sudo apt-get install python-pip python-dev
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      
+      - run:
           name: Destroy environments
           when: on_fail
           command: |
@@ -281,6 +288,7 @@ jobs:
             cd ~/project/backend
             npm cache clean --force
             npm install
+            npm audit fix
             npm run build
             npm run migrations > migrations.txt
             cat migrations.txt
