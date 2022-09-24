@@ -8,7 +8,8 @@ Parameters:
 
 Resources:
   InstanceSecurityGroup:
-    Type: AWS::EC2::SecurityGroupss
+    Type: AWS::EC2::SecurityGroup  
+    #intentionally updated SecurityGroup --> SecurityGroupss to capture output as per requirement of project
     Properties:
       GroupName: !Sub UdaPeople-${ID}
       GroupDescription: Allow port 22 and port 3030.
