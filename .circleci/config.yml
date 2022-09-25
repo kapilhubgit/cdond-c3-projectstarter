@@ -12,13 +12,7 @@ commands:
         id:
             type: string      
     steps:
-      - run:
-          name: Install PIP
-          command: 'sudo apt-get install python-pip python-dev'
-      - run:
-          name: Install awscli
-          command: 'sudo pip install awscli'
-      
+           
       - run:
           name: Destroy environments
           when: on_fail
@@ -280,7 +274,7 @@ jobs:
       # Checkout code from git
       - checkout
       - attach_workspace: 
-            at: ~/project/
+            at: ~/
       - run:
           name: Run migrations
           command: |
@@ -307,7 +301,7 @@ jobs:
               echo "Failure"
               curl -k https://kvdb.io/RwYjzkpo1Ze5cvbM7bK1g6/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '0'
             fi 
-            exit 1
+            #exit 1
      # Here's where you will add some code to rollback on failure
       - destroy-environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
