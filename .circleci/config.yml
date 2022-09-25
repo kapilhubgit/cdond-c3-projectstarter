@@ -283,7 +283,7 @@ jobs:
             npm cache clean --force
             rm -rf node_modules
             npm install
-            npm audit fix --force
+            npm audit fix
             npm run build
             npm run migrations > migrations.txt
             cat migrations.txt
