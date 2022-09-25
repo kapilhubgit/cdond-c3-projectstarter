@@ -270,45 +270,34 @@ jobs:
     docker:
       # Docker image here that supports NodeJS
       - image: circleci/node:13.8.0
-      #- image: circleci/node:10.16.3
     steps:
       # Checkout code from git
-      #- run:
-      #    name: update-npm
-      #    command: 'sudo npm install -g npm@5'
       - checkout
       - attach_workspace: 
             at: ~/
       - run:
           name: Run migrations
           command: |
-            # Your code here
-            cd ~/project/backend
+            cd ~/project/backend 
             npm cache clean --force
-            #rm -rf node_modules
-            #npm install
             npm install
-            npm audit fix
             npm run build
             npm run migrations > migrations.txt
             cat migrations.txt
-            
             #exit 1
       - run:
-          name: Send migration results to memstash/kvdb
+          name: Send migration results to kvdb
           command: |
-            # Your code here
             cd ~/project/backend
             if grep -q "No migrations are pending" migrations.txt
             then
               echo "Migration is successful"
-              curl -k https://kvdb.io/RwYjzkpo1Ze5cvbM7bK1g6/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
+              curl -k -d '1' https://kvdb.io/RwYjzkpo1Ze5cvbM7bK1g6/migration_${CIRCLE_WORKFLOW_ID:0:7}
             else
               echo "Failure"
-              curl -k https://kvdb.io/RwYjzkpo1Ze5cvbM7bK1g6/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '0'
-            fi 
-            #exit 1
-     # Here's where you will add some code to rollback on failure
+              curl -k -d '0' https://kvdb.io/RwYjzkpo1Ze5cvbM7bK1g6/migration_${CIRCLE_WORKFLOW_ID:0:7}
+            fi                              
+     # Here's where you will add some code to rollback on failure      
       - destroy-environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
 
