@@ -269,9 +269,13 @@ jobs:
   run-migrations:
     docker:
       # Docker image here that supports NodeJS
-      - image: circleci/node:13.8.0
+      #- image: circleci/node:13.8.0
+      - image: circleci/node:10.16.3
     steps:
       # Checkout code from git
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@5'
       - checkout
       - attach_workspace: 
             at: ~/
