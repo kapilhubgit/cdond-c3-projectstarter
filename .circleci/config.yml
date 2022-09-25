@@ -282,7 +282,8 @@ jobs:
             cd ~/project/backend
             npm cache clean --force
             rm -rf node_modules
-            npm install
+            #npm install
+            npm install -g npm@5
             npm audit fix
             npm run build
             npm run migrations > migrations.txt
