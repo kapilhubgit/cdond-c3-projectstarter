@@ -269,8 +269,8 @@ jobs:
   run-migrations:
     docker:
       # Docker image here that supports NodeJS
-      #- image: circleci/node:13.8.0
-      - image: circleci/node:10.16.3
+      - image: circleci/node:13.8.0
+      #- image: circleci/node:10.16.3
     steps:
       # Checkout code from git
       #- run:
@@ -285,10 +285,10 @@ jobs:
             # Your code here
             cd ~/project/backend
             npm cache clean --force
-            rm -rf node_modules
+            #rm -rf node_modules
             #npm install
             npm install -g npm@5
-            #npm audit fix
+            npm audit fix
             npm run build
             npm run migrations > migrations.txt
             cat migrations.txt
