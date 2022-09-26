@@ -508,8 +508,7 @@ jobs:
               else
                 echo "==============cannot cleanup========================"
                 echo "no stacks found"
-              fi
-              
+              fi              
               
 workflows:
   default:
