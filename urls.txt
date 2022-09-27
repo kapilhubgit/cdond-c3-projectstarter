@@ -1,0 +1,5 @@
+[URL01] - https://github.com/kapilhubgit/cdond-c3-projectstarter.git
+[URL02] - http://udapeople-139db3a.s3-website-us-east-1.amazonaws.com/#/employees
+[URL03] - http://d3283udy6tfw1e.cloudfront.net/#/employees
+[URL04] - http://34.205.239.249:3030/api/status
+[URL05] - http://ec2-100-26-190-7.compute-1.amazonaws.com:9090/alerts
